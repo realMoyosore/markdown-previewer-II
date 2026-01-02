@@ -1,0 +1,161 @@
+import { useState, useEffect } from 'react';
+import { marked } from 'marked';
+import CodeMirror from '@uiw/react-codemirror';
+import { markdown as markdownLang } from '@codemirror/lang-markdown';
+import { okaidia } from '@uiw/codemirror-theme-okaidia';
+import { Toolbar } from './Toolbar';
+
+const defaultMarkdown = `
+# Welcome to my React Markdown Previewer!
+
+## Your sub-headings go here...
+
+### Other text can be **bold** or _italic_.
+#### You can also combine them... **_bold and italic!_** \`<div></div>\`
+#### And of course, there are lists:
+
+1. First ordered list item
+2. Second ordered list item
+3. Third ordered list item
+
+- Unordered list item 1
+- Unordered list item 2
+- Unordered list item 3
+
+You can add logos like this one:
+![React Logo](https://cdn.iconscout.com/icon/free/png-256/react-1-282599.png)
+
+And of course, links:
+[Visit React](https://react.dev)
+
+Feel free to edit this markdown and see the preview update in real-time!
+
+Happy coding! \`:) \`
+`;
+
+const LOCAL_STORAGE_KEY = 'markdown-content';
+
+export function MarkdownEditor() {
+
+    // Load from local storage on initial render
+  const [markdown, setMarkdown] = useState<string>(() => {
+    return localStorage.getItem(LOCAL_STORAGE_KEY) || defaultMarkdown;
+  });
+
+  // Save to local storage whenever markdown changes
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      localStorage.setItem(LOCAL_STORAGE_KEY, markdown);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [markdown]);
+    
+    const handleFileLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        setMarkdown(text);
+      };
+      reader.readAsText(file);
+    }
+    };
+    
+    const handleFileSave = () => {
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'document.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const getMarkdownText = () => {
+    const rawMarkup = marked.parse(markdown, { breaks: true, gfm: true });
+    return { __html: rawMarkup };
+    };
+    
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastPostId, setLastPostId] = useState<number | null>(null);
+
+  const handleSaveToApi = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: 'My Markdown Content',
+          body: markdown,
+          userId: 1,
+        }),
+        headers: { 'Content-type': 'application/json; charset=UTF-8' },
+      });
+      const data = await response.json();
+      setLastPostId(data.id);
+      alert(`Content saved with ID: ${data.id}`);
+    } catch (error) {
+      console.error('Failed to save content:', error);
+      alert('Error saving content.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadFromApi = async () => {
+    const id = prompt("Enter the ID of the content to load:", String(lastPostId || ''));
+    if (!id) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
+      if (!response.ok) throw new Error('Post not found');
+      const data = await response.json();
+      setMarkdown(data.body);
+      setLastPostId(data.id);
+    } catch (error) {
+      console.error('Failed to load content:', error);
+      alert('Error loading content.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+    return (
+        <div>
+            <Toolbar onLoadFile={handleFileLoad} onSaveFile={handleFileSave} onSaveToApi={handleSaveToApi} onLoadFromApi={handleLoadFromApi} isLoading={isLoading} />
+<main className="flex-grow flex flex-row max-[520px]:flex-col">
+      
+      {/* Editor Panel */}
+      <div className="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 mr-px">
+        <CodeMirror
+          value={markdown}
+          className="h-full"
+          height="100%"
+          theme={okaidia}
+          extensions={[markdownLang()]}
+          onChange={(value) => setMarkdown(value)}
+        />
+      </div>
+
+      <div className="border-l border-gray-300 max-[520px]:border-l-0 max-[520px]:border-t" />
+
+
+      {/* Preview Panel */}
+      <div className="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 p-4 overflow-y-auto">
+        <div
+          id="preview"
+          dangerouslySetInnerHTML={getMarkdownText()}
+          className="prose dark:prose-invert max-w-none"
+        />
+      </div>
+    </main>
+            </div>
+  );
+}
