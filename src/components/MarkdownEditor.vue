@@ -6,7 +6,7 @@ import { markdown as markdownLang } from '@codemirror/lang-markdown';
 import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import Toolbar from './Toolbar.vue';
 
-// --- Default Data ---
+// Default text for the editor on first load
 const defaultMarkdown = `
 # Welcome to my Vue Markdown Previewer!
 
@@ -37,18 +37,18 @@ Happy coding! \`:) \`
 
 const LOCAL_STORAGE_KEY = 'markdown-content';
 
-// --- State ---
+// State Variables
 const markdown = ref<string>('');
 const isLoading = ref(false);
 const lastPostId = ref<number | null>(null);
 
-// --- Initialization ---
+
 onMounted(() => {
   const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
   markdown.value = stored || defaultMarkdown;
 });
 
-// --- Watchers (Auto-save to LocalStorage) ---
+
 let timeoutHandler: number;
 watch(markdown, (newValue) => {
   clearTimeout(timeoutHandler);
@@ -57,24 +57,22 @@ watch(markdown, (newValue) => {
   }, 500);
 });
 
-// --- Computed Properties ---
+
 const renderedMarkdown = computed(() => {
   return marked.parse(markdown.value, { breaks: true, gfm: true });
 });
 
-// --- Codemirror Configuration ---
-// shallowRef is recommended for editor extensions to avoid unnecessary deep reactivity performance costs
+// Codemirror Configuration
 const extensions = shallowRef([markdownLang(), okaidia]);
 
-// --- Handlers ---
-
+// Handlers
 const handleFileLoad = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
+ ---      const text = e.target?.result as string;
       markdown.value = text;
     };
     reader.readAsText(file);
@@ -146,7 +144,7 @@ const handleLoadFromApi = async () => {
       @load-api="handleLoadFromApi" 
     />
     
-    <main class="flex-grow flex flex-row max-[520px]:flex-col overflow-hidden">
+    <main class="grow flex flex-row max-[520px]:flex-col overflow-hidden">
       <div class="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 mr-px overflow-hidden bg-[#272822]">
         <Codemirror
           v-model="markdown"
@@ -173,7 +171,7 @@ const handleLoadFromApi = async () => {
 </template>
 
 <style scoped>
-/* Ensure CodeMirror takes full height */
+    
 :deep(.cm-editor) {
   height: 100%;
 }
