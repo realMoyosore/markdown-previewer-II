@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, shallowRef } from 'vue';
 import { marked } from 'marked';
-import { Codemirror } from 'vue-codemirror';
+import Codemirror from '@codemirror/vue';
 import { markdown as markdownLang } from '@codemirror/lang-markdown';
-import { okaidia } from '@uiw/codemirror-theme-okaidia';
 import Toolbar from './Toolbar.vue';
 
 // Default text for the editor on first load
@@ -63,7 +62,7 @@ const renderedMarkdown = computed(() => {
 });
 
 // Codemirror Configuration
-const extensions = shallowRef([markdownLang(), okaidia]);
+const extensions = shallowRef([markdownLang()]);
 
 // Handlers
 const handleFileLoad = (event: Event) => {
@@ -136,16 +135,16 @@ const handleLoadFromApi = async () => {
 
 <template>
   <div class="flex flex-col h-screen">
-    <Toolbar 
+    <Toolbar
       :is-loading="isLoading"
-      @load-file="handleFileLoad" 
-      @save-file="handleFileSave" 
-      @save-api="handleSaveToApi" 
-      @load-api="handleLoadFromApi" 
-    />
-    
+      @load-file="handleFileLoad"
+      @save-file="handleFileSave"
+      @save-api="handleSaveToApi"
+      @load-api="handleLoadFromApi" />
+
     <main class="grow flex flex-row max-[520px]:flex-col overflow-hidden">
-      <div class="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 mr-px overflow-hidden bg-[#272822]">
+      <div
+        class="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 mr-px overflow-hidden bg-[#272822]">
         <Codemirror
           v-model="markdown"
           placeholder="Type markdown here..."
@@ -153,25 +152,23 @@ const handleLoadFromApi = async () => {
           :autofocus="true"
           :indent-with-tab="true"
           :tab-size="2"
-          :extensions="extensions"
-        />
+          :extensions="extensions" />
       </div>
 
       <div class="border-l border-gray-300 max-[520px]:border-l-0 max-[520px]:border-t" />
 
-      <div class="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 p-4 overflow-y-auto bg-background">
+      <div
+        class="w-1/2 max-[520px]:w-full h-full max-[520px]:h-1/2 p-4 overflow-y-auto bg-background">
         <div
           id="preview"
           v-html="renderedMarkdown"
-          class="prose dark:prose-invert max-w-none"
-        ></div>
+          class="prose dark:prose-invert max-w-none"></div>
       </div>
     </main>
   </div>
 </template>
 
 <style scoped>
-    
 :deep(.cm-editor) {
   height: 100%;
 }
