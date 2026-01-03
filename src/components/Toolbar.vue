@@ -2,8 +2,8 @@
 import { 
   Upload, 
   Save, 
-  CloudUpload, 
-  CloudDownload, 
+  UploadCloud, 
+  DownloadCloud, 
   FileText 
 } from 'lucide-vue-next';
 import Button from '@/components/ui/Button.vue';
@@ -65,7 +65,7 @@ const onFileChange = (e: Event) => emit('load-file', e);
         :disabled="isLoading"
         title="Save to Cloud"
       >
-        <CloudUpload class="h-4 w-4" />
+        <UploadCloud class="h-4 w-4" />
       </Button>
 
       <Button 
@@ -75,7 +75,7 @@ const onFileChange = (e: Event) => emit('load-file', e);
         :disabled="isLoading"
         title="Load from Cloud"
       >
-        <CloudDownload class="h-4 w-4" />
+        <DownloadCloud class="h-4 w-4" />
       </Button>
 
       <span v-if="isLoading" class="text-sm animate-pulse ml-2">Processing...</span>

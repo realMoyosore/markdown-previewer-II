@@ -13,7 +13,7 @@ import { ref, onErrorCaptured } from "vue";
 
 const hasError = ref(false);
 
-onErrorCaptured((error, instance, info) => {
+onErrorCaptured((error, info) => {
   console.error("Uncaught error:", error, info);
   hasError.value = true;
   return false; // Prevent the error from propagating further

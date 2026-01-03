@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, shallowRef } from 'vue';
 import { marked } from 'marked';
-import Codemirror from '@codemirror/vue';
+import { Codemirror } from 'vue-codemirror';
 import { markdown as markdownLang } from '@codemirror/lang-markdown';
 import Toolbar from './Toolbar.vue';
 
@@ -71,7 +71,7 @@ const handleFileLoad = (event: Event) => {
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
- ---      const text = e.target?.result as string;
+      const text = e.target?.result as string;
       markdown.value = text;
     };
     reader.readAsText(file);
